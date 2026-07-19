@@ -1,0 +1,67 @@
+# boss-auto-apply .gitignore
+
+# === 运行时产物（绝不进库）===
+data/
+!data/.gitkeep
+
+# === venv ===
+.venv/
+venv/
+env/
+
+# === 敏感信息 ===
+config/secrets.yaml
+config/config.yaml
+
+# === 个人交接文档（含个人项目细节，不公开）===
+# 本地保留供 AI agent 上下文恢复用，但不进公开仓库
+docs/HANDOVER.md
+
+# === 数据备份（含个人信息）===
+*.backup_*
+*.bak
+data/*.backup_*
+
+# === Python ===
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# === 模板（git clone 来的）===
+templates/brilliant-cv/
+
+# === 简历原件（多格式：pdf/docx/md/txt）===
+input/resume.*
+input/*.pdf
+input/*.docx
+input/*.md
+input/*.txt
+
+# === 简历产物（含个人项目细节）===
+output/
+
+# === zcode 工具产物（本地会话计划）===
+.zcode/
+
+# === 日志 ===
+*.log
+data/logs/
+
+# === IDE ===
+.idea/
+.vscode/
+*.swp
+.DS_Store
+
+# === OS ===
+Thumbs.db
+ehthumbs.db

@@ -1,0 +1,151 @@
+{
+  "schema_version": "1.0",
+  "basics": {
+    "name": "张三",
+    "phone": "138-0000-0001",
+    "email": "zhangsan@example.com",
+    "cities": ["上海", "武汉"],
+    "headline": "SEO 增长专家 / SaaS 内容运营",
+    "work_years_total": 5.5,
+    "work_years_note": "2019.07-2025.03 三段可验证经历；自由职业期(2025.03-)另计",
+    "degree": "本科",
+    "major": "市场营销",
+    "school": "示例理工大学",
+    "edu_period": "2015.09-2019.06",
+    "candidate_profile": {
+      "target_role_keywords": ["SEO", "内容运营", "增长运营", "SaaS 运营", "流量增长"],
+      "role_category": "运营",
+      "seniority_level": "中级",
+      "work_years_authoritative": 5.5,
+      "core_industries": ["SaaS", "工具类产品"],
+      "exclusion_keywords": ["助理", "实习", "销售"]
+    }
+  },
+  "skill_modules": {
+    "seo_growth": {
+      "summary": "SEO/SEM/ASO 全栈流量获取；SaaS 产品站 0→1 自然搜索增长",
+      "bullet_points": [
+        "主导 SaaS 产品官网 SEO 体系搭建，自然搜索流量实现从 0 到稳定增长",
+        "技术 SEO + 内容 SEO 双轮驱动，核心关键词排名持续上升",
+        "搭建搜索流量监控看板，周维度归因迭代内容策略"
+      ],
+      "tools": ["SEO", "技术 SEO", "内容 SEO", "Google Search Console"]
+    },
+    "content_growth": {
+      "summary": "开发者社区/博客内容矩阵搭建；长尾词驱动的内容选题",
+      "bullet_points": [
+        "搭建技术博客 + 开发者社区内容矩阵，长尾词布局带动自然流量",
+        "建立内容选题 SOP，结合搜索意图与产品特性产出高转化内容",
+        "协同产研团队产出技术文档，提升产品文档的自然搜索可见度"
+      ],
+      "tools": ["内容运营", "长尾词布局", "Ahrefs", "Semrush"]
+    },
+    "data_analysis": {
+      "summary": "理工科背景；漏斗/A-B 测试/ROI 分析驱动决策",
+      "bullet_points": [
+        "A/B 测试优化落地页文案与 CTA，注册转化率显著提升",
+        "归因分析搜索流量 → 注册 → 付费全链路，定位增长瓶颈"
+      ],
+      "tools": ["漏斗分析", "A/B 测试", "ROI 分析", "SQL"]
+    },
+    "biz_dev": {
+      "summary": "跨部门协作 + 合作渠道拓展",
+      "bullet_points": [
+        "协同销售/产研团队搭建线索流转闭环，提升市场线索质量",
+        "拓展行业媒体与 KOL 合作渠道，沉淀可复用的 BD SOP"
+      ],
+      "tools": ["跨部门协作", "渠道拓展", "BD SOP"]
+    }
+  },
+  "projects": [
+    {
+      "name": "SaaS 产品站 SEO 体系搭建",
+      "period": "2022.06-2025.03",
+      "company": "示例 SaaS 公司",
+      "stack": ["技术 SEO", "内容 SEO", "Search Console"],
+      "role": "SEO 增长负责人",
+      "highlights": [
+        "主导 SaaS 产品官网 SEO 体系从 0 搭建，自然搜索流量实现稳定增长（不暴露基数）",
+        "技术 SEO + 内容 SEO 双轮驱动，核心关键词排名持续上升",
+        "搭建搜索流量监控看板，周维度归因迭代内容策略"
+      ],
+      "interview_safe": true,
+      "data_standards_applied": ["自然搜索流量稳定增长（不暴露原值）"]
+    },
+    {
+      "name": "开发者社区内容矩阵",
+      "period": "2020.05-2022.05",
+      "company": "示例工具类公司",
+      "stack": ["内容运营", "长尾词布局", "Ahrefs"],
+      "role": "内容运营（独立负责）",
+      "highlights": [
+        "搭建技术博客 + 开发者社区内容矩阵，长尾词布局带动自然流量",
+        "建立内容选题 SOP，结合搜索意图与产品特性产出高转化内容",
+        "协同产研团队产出技术文档，提升产品文档的自然搜索可见度"
+      ],
+      "interview_safe": true,
+      "data_standards_applied": ["长尾词布局带动自然流量（不写具体排名数字）"]
+    },
+    {
+      "name": "工具产品 ASO 与投放",
+      "period": "（大学期间，实习）",
+      "company": "—",
+      "stack": ["ASO", "SEM", "数据分析"],
+      "role": "增长实习生",
+      "highlights": [
+        "参与工具类产品的 ASO 关键词优化，协助优化应用商店排名",
+        "学习 SEM 投放与数据归因，沉淀增长运营基本功"
+      ],
+      "interview_safe": true,
+      "data_standards_applied": ["学习型经历（不写夸张业绩）"]
+    }
+  ],
+  "experiences": [
+    {
+      "company": "示例 SaaS 公司",
+      "position": "SEO 增长负责人",
+      "period": "2022.06-2025.03",
+      "highlights": ["见 projects[0]"]
+    },
+    {
+      "company": "示例工具类公司",
+      "position": "内容运营",
+      "period": "2020.05-2022.05",
+      "highlights": ["见 projects[1]"]
+    },
+    {
+      "company": "示例互联网公司",
+      "position": "增长运营专员",
+      "period": "2019.07-2020.04",
+      "highlights": [
+        "协助搭建搜索流量监控体系，定位增长机会关键词",
+        "执行内容发布 SOP 与 SEO 操作规范，提升内容收录效率"
+      ]
+    },
+    {
+      "company": "自由职业",
+      "position": "独立增长顾问（为多家 SaaS 初创提供 SEO 咨询）",
+      "period": "2025.03-至今",
+      "highlights": [
+        "服务 3+ 客户，主导产品站 0→1 SEO 体系搭建",
+        "迁移前司「技术 SEO + 内容 SEO」方法论到不同 SaaS 细分赛道"
+      ],
+      "interview_safe": true,
+      "freelance_strategy": "B+C 策略；客户名作隐私不写入简历"
+    }
+  ],
+  "constraints": {
+    "primary_direction": "SEO 增长",
+    "salary_band": {"上海": "15-22K", "武汉": "10-15K"},
+    "degree_filter": "本科",
+    "work_years_authoritative": 5.5,
+    "forbidden_words_extra": ["翻3倍", "7年", "万级"],
+    "data_standards_locked": [
+      "稳定增长（不暴露原值）",
+      "排名持续上升 → 排名持续上升（不写具体名次）",
+      "注册转化率提升 → 注册转化率显著提升（不写百分比）",
+      "线索质量提升 → 协同销售搭建线索流转闭环"
+    ]
+  },
+  "health_check_status": "pending"
+}

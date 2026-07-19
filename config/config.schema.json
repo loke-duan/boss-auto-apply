@@ -1,0 +1,174 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://boss-auto-apply/config.schema.json",
+  "title": "boss-auto-apply 配置",
+  "type": "object",
+  "required": ["pipeline", "cities", "target_constraints", "llm", "paths"],
+  "additionalProperties": true,
+  "properties": {
+    "pipeline": {
+      "type": "object",
+      "required": ["mode"],
+      "properties": {
+        "mode": {"enum": ["dry-run", "auto", "confirm", "manual"]},
+        "dry_run": {"type": "boolean"},
+        "skip_greeted": {"type": "boolean"},
+        "dedupe_by_company": {"type": "boolean"},
+        "exclude_companies": {"type": "array", "items": {"type": "string"}},
+        "require_jd_match": {"type": "boolean"},
+        "require_target_confirmation": {"type": "boolean"},
+        "require_health_check": {"type": "boolean", "const": true},
+        "require_resume_review": {"type": "boolean"}
+      }
+    },
+    "cities": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 4,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "targets": {"type": "array"},
+    "target_constraints": {
+      "type": "object",
+      "required": ["primary_direction", "salary", "degree"],
+      "properties": {
+        "primary_direction": {"type": "string", "minLength": 1},
+        "salary": {"type": "object"},
+        "degree": {"enum": ["大专", "本科", "硕士", "不限"]},
+        "experience": {"type": "string"},
+        "forbidden_words_extra": {"type": "array", "items": {"type": "string"}},
+        "sub_directions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "weight"],
+            "properties": {
+              "name": {"type": "string"},
+              "weight": {"type": "number", "minimum": 0, "maximum": 1},
+              "keywords_hint": {"type": "array", "items": {"type": "string"}},
+              "warning": {"type": "string"}
+            }
+          }
+        }
+      }
+    },
+    "search": {
+      "type": "object",
+      "properties": {
+        "provider": {"enum": ["mock", "boss-cli", "drissionpage"]},
+        "fixtures_dir": {"type": "string"},
+        "per_target_limit": {"type": "integer", "minimum": 1, "maximum": 100},
+        "boss_pypi_pkg": {"type": "string"},
+        "boss_install_hint": {"type": "string"}
+      }
+    },
+    "sender": {
+      "type": "object",
+      "properties": {
+        "primary": {"enum": ["drissionpage", "boss-cli"]},
+        "driver": {"enum": ["drissionpage", "nodriver"]},
+        "user_data_dir": {"type": "string"},
+        "stealth": {"type": "boolean"},
+        "headless": {"type": "boolean"},
+        "check_chrome_running": {"type": "boolean"},
+        "auto_quit_idle_sec": {"type": "integer", "minimum": 0},
+        "send_image_resume": {"type": "boolean"},
+        "wait_relation_sec": {"type": "integer", "minimum": 0},
+        "chat_text_max_len": {"type": "integer", "minimum": 1},
+        "image_max_kb": {"type": "integer", "minimum": 1},
+        "image_width_px": {"type": "integer", "minimum": 1},
+        "browser_path": {"type": ["string", "null"]},
+        "load_mode": {"enum": ["eager", "normal", "none"]}
+      }
+    },
+    "llm": {
+      "type": "object",
+      "required": ["model_tailor", "model_profiler"],
+      "properties": {
+        "backend": {"type": "string", "enum": ["claude"]},
+        "claude_bin": {"type": "string", "minLength": 1},
+        "login_hint": {"type": "string"},
+        "model_tailor": {"type": "string"},
+        "model_profiler": {"type": "string"},
+        "model_hrbp": {"type": "string"},
+        "model_matcher": {"type": "string"},
+        "model_greeter": {"type": "string"},
+        "temperature": {"type": "number", "minimum": 0, "maximum": 2},
+        "timeout_sec": {"type": "integer", "minimum": 30, "maximum": 600},
+        "max_retries": {"type": "integer", "minimum": 0, "maximum": 5},
+        "backoff_base_sec": {"type": "number", "minimum": 0},
+        "tailor_strategy": {"enum": ["cluster", "per_job"]},
+        "cache": {"type": "boolean"},
+        "polish_level": {"type": "string"}
+      }
+    },
+    "limits": {
+      "type": "object",
+      "properties": {
+        "daily_total": {"type": "integer", "minimum": 1, "maximum": 100},
+        "per_session": {"type": "integer", "minimum": 1},
+        "min_interval_sec": {"type": "integer", "minimum": 0},
+        "max_interval_sec": {"type": "integer", "minimum": 0},
+        "burst_size": {"type": "integer", "minimum": 1},
+        "burst_rest_sec": {
+          "type": "array",
+          "items": {"type": "integer", "minimum": 0},
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "active_hours": {
+          "type": "array",
+          "items": {"type": "integer", "minimum": 0, "maximum": 24},
+          "minItems": 2
+        },
+        "active_weekdays_only": {"type": "boolean"},
+        "cooldown_on_risk_sec": {"type": "integer", "minimum": 0},
+        "warmup_schedule": {"type": "array", "items": {"type": "integer"}}
+      }
+    },
+    "circuit_breaker": {
+      "type": "object",
+      "properties": {
+        "consecutive_fail_threshold": {"type": "integer", "minimum": 1},
+        "fail_rate_threshold": {"type": "number", "minimum": 0, "maximum": 1},
+        "fail_rate_min_samples": {"type": "integer", "minimum": 1},
+        "sliding_window_sec": {"type": "integer", "minimum": 0},
+        "sliding_window_max": {"type": "integer", "minimum": 1},
+        "soft_duration_consecutive_sec": {"type": "integer", "minimum": 0},
+        "soft_duration_rate_sec": {"type": "integer", "minimum": 0},
+        "hard_duration_sec": {"type": "integer", "minimum": 0},
+        "auto_degrade_threshold": {"type": "integer", "minimum": 1}
+      }
+    },
+    "pdf": {
+      "type": "object",
+      "properties": {
+        "template": {"type": "string"},
+        "font": {"type": "string"},
+        "typst_bin": {"type": "string"},
+        "template_dir": {"type": "string"},
+        "png_dpi": {"type": "integer", "minimum": 72, "maximum": 400}
+      }
+    },
+    "paths": {
+      "type": "object",
+      "required": ["db"],
+      "properties": {
+        "resume_input": {"type": "string"},
+        "master_json": {"type": "string"},
+        "master_health": {"type": "string"},
+        "targets_confirmed": {"type": "string"},
+        "resumes_out": {"type": "string"},
+        "db": {"type": "string"},
+        "logs": {"type": "string"}
+      }
+    }
+  },
+  "if": {
+    "properties": {"pipeline": {"properties": {"dry_run": {"const": false}}}}
+  },
+  "then": {
+    "properties": {"search": {"properties": {"provider": {"enum": ["boss-cli", "drissionpage"]}}}}
+  },
+  "else": {}
+}

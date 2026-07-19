@@ -1,0 +1,31 @@
+# boss-auto-apply 依赖清单（设计 §2.2）
+# 用法：conda 建 3.12 venv 后 pip install -r requirements.txt
+
+# === 解析 ===
+docling>=2.20,<3             # 主解析器（PDF/DOCX）；装不上时由代码兜底（dual-parser）
+pymupdf>=1.24                # fallback parser + F6 PDF→PNG 兜底
+python-docx>=1.1             # DOCX fallback parser（docling 装不上时兜底）
+
+# === LLM / CLI ===
+# LLM 走 subprocess 调 claude CLI（claude auth login 登录）
+# 仅需保证 claude 在 PATH
+
+# === 配置 / 数据 ===
+pyyaml>=6.0
+jsonschema>=4.21
+pydantic>=2.7                # config / master.json 强类型校验
+
+# === 图像 ===
+pillow>=10.0                 # 多页拼接（M3 复用：图片压缩到 <1MB）
+
+# === 浏览器自动化（M3） ===
+DrissionPage==4.1.1.4        # M3 真发送主驱动（登录+搜索+详情页）
+nodriver>=0.4                # 反检测引擎（聊天页发送，绕过 zpAegis，ADR-0003）
+
+# === 可观测 ===
+loguru>=0.7
+rich>=13.7                   # CLI 彩色输出（体检报告/画像展示）
+
+# === 测试（dev） ===
+pytest>=8.0
+pytest-cov>=5.0

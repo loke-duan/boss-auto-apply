@@ -1,0 +1,118 @@
+# ============================================================
+# BOSS 直聘智能投递助手 - 配置示例（设计 §4.3）
+# 用法：cp config/config.example.yaml config/config.yaml 后按需修改
+# 所有值均为示例，请替换为你的真实信息。
+# ============================================================
+
+# === 模式 ===
+pipeline:
+  mode: "dry-run"          # dry-run（不触网）/ auto / confirm / manual
+  dry_run: true            # M1+M2 默认 dry-run；真发送设 false
+  skip_greeted: true
+  dedupe_by_company: true
+  exclude_companies: []
+  require_jd_match: true
+  require_target_confirmation: true   # F1.5 暂停等确认
+  require_health_check: true          # F1.6 强制（ADR-0001）
+  require_resume_review: true         # F1.7 简历解析后交互问答（需求2）
+
+# === 城市/方向约束（F1.5 HRBP 硬约束）===
+# ▼▼▼ 替换为你的求职方向和城市 ▼▼▼
+cities: ["上海"]                         # 你想投递的城市（1-4个）
+targets: []                              # F1.5 推荐后自动填入 targets.confirmed.yaml
+target_constraints:
+  primary_direction: "（你的主方向，如：后端开发/产品经理/设计师）"
+  sub_directions:
+    - {name: "（子方向1）", weight: 0.5, keywords_hint: ["关键词1","关键词2"]}
+    - {name: "（子方向2）", weight: 0.3, keywords_hint: ["关键词3","关键词4"]}
+    - {name: "（子方向3）", weight: 0.2, keywords_hint: ["关键词5","关键词6"]}
+  salary: {"上海": "15-25K"}            # 城市 → 期望薪资带
+  experience: "3-5年"                    # 你的工作年限范围
+  degree: "本科"                         # 你的学历（大专/本科/硕士/不限）
+  forbidden_words_extra: []              # 候选人专属禁忌词（如简历中不应出现的旧数据）
+# ▲▲▲ 替换为你的求职方向和城市 ▲▲▲
+
+# === 搜索 ===
+search:
+  provider: "mock"                     # mock（默认）/ boss-cli / drissionpage
+  fixtures_dir: "tests/fixtures"       # mock 模式读 JD JSON
+  per_target_limit: 20                 # 每方向每城最大拉取数（控成本）
+
+# === M3 真发送（设计附录 A）===
+sender:
+  primary: "drissionpage"              # drissionpage（默认）/ boss-cli
+  driver: "nodriver"                   # 真发送必须 nodriver（drissionpage 聊天页被 zpAegis 拦死，ADR-0003）；
+                                       # drissionpage 仅 dry-run 用。run 前 pkill -9 -f "Google Chrome"
+  user_data_dir: "~/.boss-auto-apply/chrome-profile"
+  stealth: true                        # 注入 stealth.js 反检测
+  headless: false                      # 反检测要求有头
+  check_chrome_running: true
+  auto_quit_idle_sec: 600              # 空闲 10min 自动关闭浏览器
+  send_image_resume: true
+  wait_relation_sec: 8                 # greet 后等待沟通关系（随机 5-15s）
+  chat_text_max_len: 200               # [假设] 聊天框字数限制
+  image_max_kb: 1024                   # 图片压缩到 <1MB
+  image_width_px: 1080                 # 图片宽度
+  load_mode: "eager"
+
+# === LLM（走 claude CLI）===
+# 登录：claude auth login（需先安装 claude CLI 并保证在 PATH 中）
+llm:
+  backend: "claude"
+  claude_bin: "claude"                 # claude CLI 可执行文件名或绝对路径
+  login_hint: "claude auth login"
+  model_tailor:   "sonnet"             # F4 定制（强）
+  model_profiler: "sonnet"             # F1.5 画像（强）
+  model_hrbp:     "sonnet"             # F1.6 体检（强）
+  model_matcher:  "haiku"              # F3 JD 抽取（便宜）
+  model_greeter:  "haiku"              # F7 话术（便宜）
+  temperature: 0.3
+  timeout_sec: 180
+  max_retries: 3
+  backoff_base_sec: 2
+  tailor_strategy: "cluster"           # JD 签名聚类复用
+  cache: true
+  polish_level: "moderate"
+
+# === 限流（M3 RealRateLimiter，设计 §9 / 附录 A）===
+limits:
+  daily_total: 15
+  per_session: 10
+  min_interval_sec: 45                 # 单次间隔下限（随机 45-120s，均值 70s）
+  max_interval_sec: 120
+  burst_size: 8                        # 连投上限
+  burst_rest_sec: [900, 1800]          # 连投后休息区间（15-30min）
+  active_hours: [9, 18]                # 活跃时段，排他上界：[9,18) 覆盖 9:00-17:59；全天用 [0, 24]
+  active_weekdays_only: true
+  cooldown_on_risk_sec: 1800           # soft 熔断时长
+  warmup_schedule: [5, 10, 15]         # 第1天≤5、第2天≤10、第3天起≤15
+
+# === 熔断器（设计 §9 / 附录 A）===
+circuit_breaker:
+  consecutive_fail_threshold: 3        # 连续失败 ≥3 → soft 30min
+  fail_rate_threshold: 0.30            # 失败率 >30% → soft 2h
+  fail_rate_min_samples: 5
+  sliding_window_sec: 1800
+  sliding_window_max: 20
+  soft_duration_consecutive_sec: 1800
+  soft_duration_rate_sec: 7200
+  hard_duration_sec: 86400             # 硬熔断 24h
+  auto_degrade_threshold: 2            # 24h 内硬熔断 ≥2 → confirm
+
+# === PDF ===
+pdf:
+  template: "brilliant-cv"
+  font: "Noto Sans CJK SC"
+  typst_bin: "typst"                   # 或绝对路径
+  template_dir: "templates/brilliant-cv"
+  png_dpi: 200
+
+# === 路径 ===
+paths:
+  resume_input: "input/resume.pdf"     # 支持 .pdf / .docx / .md / .txt
+  master_json: "data/master.json"
+  master_health: "data/master.health.json"
+  targets_confirmed: "data/targets.confirmed.yaml"
+  resumes_out: "data/resumes/"
+  db: "data/jobs.db"
+  logs: "data/logs/"

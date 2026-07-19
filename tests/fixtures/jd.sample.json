@@ -1,0 +1,87 @@
+[
+  {
+    "securityId": "mock-seo-sh-001",
+    "jobName": "SEO运营",
+    "brandName": "测试公司A",
+    "city": "上海",
+    "salary": "12-18K",
+    "experience": "3-5年",
+    "degree": "大专",
+    "target_name": "SEO/网站运营-上海",
+    "jd_full": "负责SEO优化，关键词布局，流量监控。要求3-5年SEO经验，大专以上学历。",
+    "skills_required": [
+      "SEO"
+    ]
+  },
+  {
+    "securityId": "mock-seo-sh-002",
+    "jobName": "网站运营专员",
+    "brandName": "测试公司B",
+    "city": "上海",
+    "salary": "12-18K",
+    "experience": "3-5年",
+    "degree": "大专",
+    "target_name": "SEO/网站运营-上海",
+    "jd_full": "网站SEO优化，长尾词布局，收录率提升。3-5年经验，大专以上。",
+    "skills_required": [
+      "SEO",
+      "网站运营"
+    ]
+  },
+  {
+    "securityId": "mock-seo-wh-001",
+    "jobName": "SEO专员",
+    "brandName": "测试公司C",
+    "city": "武汉",
+    "salary": "8-12K",
+    "experience": "3-5年",
+    "degree": "大专",
+    "target_name": "SEO/网站运营-武汉",
+    "jd_full": "SEO优化专员，搜索引擎优化，关键词布局。3-5年经验。",
+    "skills_required": [
+      "SEO"
+    ]
+  },
+  {
+    "securityId": "mock-seo-wh-002",
+    "jobName": "SEO优化",
+    "brandName": "测试公司D",
+    "city": "武汉",
+    "salary": "8-12K",
+    "experience": "3-5年",
+    "degree": "大专",
+    "target_name": "SEO/网站运营-武汉",
+    "jd_full": "SEO优化专员，搜索引擎优化，关键词布局。3-5年经验。",
+    "skills_required": [
+      "SEO"
+    ]
+  },
+  {
+    "securityId": "mock-private-wh-001",
+    "jobName": "私域运营",
+    "brandName": "测试公司E",
+    "city": "武汉",
+    "salary": "8-12K",
+    "experience": "3-5年",
+    "degree": "大专",
+    "target_name": "私域运营-武汉",
+    "jd_full": "私域流量运营，社群管理。",
+    "skills_required": [
+      "私域运营"
+    ]
+  },
+  {
+    "securityId": "mock-ad-sh-001",
+    "jobName": "投放运营",
+    "brandName": "测试公司F",
+    "city": "上海",
+    "salary": "12-18K",
+    "experience": "3-5年",
+    "degree": "大专",
+    "target_name": "投放运营-上海",
+    "jd_full": "信息流投放，广告优化。",
+    "skills_required": [
+      "投放"
+    ]
+  }
+]
