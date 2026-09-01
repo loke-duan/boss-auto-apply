@@ -124,6 +124,17 @@ def test_file_not_found(tmp_path):
         load_config(str(tmp_path / "nope.yaml"))
 
 
+def test_codex_backend_config_accepted(tmp_path):
+    """Codex 后端可选，且可使用 CLI 默认模型。"""
+    data = _base_valid_config()
+    data["llm"].update({"backend": "codex", "codex_bin": "codex", "codex_model": None})
+    cfg_path, schema_path = _write_config(tmp_path, data)
+    cfg = load_config(cfg_path, schema_path)
+    assert cfg.llm.backend == "codex"
+    assert cfg.llm.codex_bin == "codex"
+    assert cfg.llm.codex_model is None
+
+
 def test_active_hours_24_accepted_for_all_day(tmp_path):
     """用例7：active_hours=[0, 24] 全天配置通过 schema（maximum 已放宽到 24）。
 

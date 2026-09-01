@@ -85,8 +85,10 @@
       "type": "object",
       "required": ["model_tailor", "model_profiler"],
       "properties": {
-        "backend": {"type": "string", "enum": ["claude"]},
+        "backend": {"type": "string", "enum": ["claude", "codex"]},
         "claude_bin": {"type": "string", "minLength": 1},
+        "codex_bin": {"type": "string", "minLength": 1},
+        "codex_model": {"type": ["string", "null"]},
         "login_hint": {"type": "string"},
         "model_tailor": {"type": "string"},
         "model_profiler": {"type": "string"},
