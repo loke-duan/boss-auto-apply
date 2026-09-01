@@ -53,13 +53,29 @@ cp config/config.example.yaml config/config.yaml
 | `target_constraints.degree` | 你的学历 | `"本科"` |
 | `target_constraints.experience` | 工作年限 | `"3-5年"` |
 
-### 3. 登录 Claude CLI（LLM 引擎）
+### 3. 选择并登录 LLM CLI
 
 ```bash
 claude auth login
 ```
 
-> 项目通过 `claude` CLI 调用 LLM（subprocess），不直连 API。需先安装 Claude CLI 并保证在 PATH 中。
+> 默认通过 `claude` CLI 调用 LLM（subprocess），不直连 API。需先安装 Claude CLI 并保证在 PATH 中。
+
+也可切换到 Codex CLI：
+
+```bash
+codex login
+```
+
+```yaml
+llm:
+  backend: "codex"
+  codex_bin: "codex"
+  codex_model: null  # 使用 Codex CLI 默认模型
+```
+
+Codex 后端使用非交互 `codex exec --json` 和 read-only sandbox；
+`codex_model` 为 `null` 时不会把 Claude 的 `sonnet/haiku` 别名传给 Codex。
 
 ### 4. 放简历
 
@@ -157,7 +173,7 @@ python -m boss_auto_apply resume
 | `target_constraints` | 方向/薪资/学历/禁忌词约束 |
 | `search` | 搜索引擎（mock/drissionpage） |
 | `sender` | M3 发送配置（driver/user_data_dir/stealth） |
-| `llm` | LLM 配置（claude_bin/model_*/timeout） |
+| `llm` | LLM 配置（backend/claude_bin/codex_bin/model_*/timeout） |
 | `limits` | 限流（daily_total/interval/burst/warmup） |
 | `circuit_breaker` | 熔断器（连续失败/失败率阈值） |
 | `pdf` | PDF 生成（template/font/typst_bin） |

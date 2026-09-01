@@ -21,7 +21,7 @@ from . import db as db_mod
 from .config import AppConfig, ensure_data_dirs, load_config
 from .core import hrbp_check, parser, profiler, searcher
 from .errors import BossAutoError, ConfigValidationError, PreflightError
-from .llm import ClaudeClient
+from .llm import create_llm_client
 from .pipeline import Pipeline
 from . import preflight as preflight_mod
 
@@ -92,7 +92,8 @@ def main(argv: list[str] | None = None) -> int:
     if args.command != "status" and cfg is not None:
         try:
             report = preflight_mod.run_preflight(
-                claude_bin=cfg.llm.claude_bin,
+                backend=cfg.llm.backend,
+                llm_bin=cfg.llm.codex_bin if cfg.llm.backend == "codex" else cfg.llm.claude_bin,
                 login_hint=cfg.llm.login_hint,
                 typst_bin=cfg.pdf.get("typst_bin", "typst"),
                 font_name=cfg.pdf.get("font", "Noto Sans CJK SC"),
@@ -178,7 +179,7 @@ def _init_runtime(cfg: AppConfig, *, real_send: bool = False) -> tuple:
     db_path = cfg.paths.get("db", "data/jobs.db")
     db_mod.init_db(db_path)
     conn = _open_conn(db_path)
-    llm = ClaudeClient(cfg.llm, cache_conn=conn)
+    llm = create_llm_client(cfg.llm, cache_conn=conn)
 
     # BrowserManager：drissionpage 搜索或真发送都需要
     browser_manager = None

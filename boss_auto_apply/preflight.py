@@ -159,6 +159,64 @@ def check_claude_login(claude_bin: str = DEFAULT_CLAUDE_BIN, llm: Any = None,
                            message=f"claude auth status 探测失败：{e}", detail=login_hint)
 
 
+def check_llm_bin(backend: str, llm_bin: str) -> CheckResult:
+    """根据后端检查 CLI；Claude 路径保留原有提示。"""
+    if backend == "claude":
+        return check_claude_bin(llm_bin)
+    path = shutil.which(llm_bin)
+    if not path:
+        return CheckResult(
+            "P2", "codex CLI", False, fatal=True,
+            message=f"codex 命令未找到（{llm_bin}）",
+            detail="请安装 Codex CLI 并运行 codex login",
+        )
+    try:
+        import subprocess
+        proc = subprocess.run([path, "--version"], capture_output=True, text=True, timeout=10)
+        ver = (proc.stdout or "").strip() or "ok"
+        return CheckResult("P2", "codex CLI", proc.returncode == 0,
+                           fatal=proc.returncode != 0, message=f"{ver} @ {path}")
+    except Exception as e:
+        return CheckResult("P2", "codex CLI", False, fatal=True,
+                           message=f"codex 探测失败：{e}")
+
+
+def check_llm_login(backend: str, llm_bin: str, llm: Any = None,
+                    login_hint: str = DEFAULT_LOGIN_HINT, *,
+                    skip_in_dry_run: bool = True,
+                    is_dry_run: bool = True) -> CheckResult:
+    """根据后端检查登录态。"""
+    if backend == "claude":
+        return check_claude_login(
+            llm_bin, llm, login_hint,
+            skip_in_dry_run=skip_in_dry_run, is_dry_run=is_dry_run,
+        )
+    if skip_in_dry_run and is_dry_run:
+        return CheckResult("P3", "codex 登录", False, fatal=False,
+                           message="dry-run 模式跳过登录探测", detail="codex login")
+    if llm is not None:
+        try:
+            llm.check_login()
+            return CheckResult("P3", "codex 登录", True, message="codex login status 通过")
+        except ClaudeLoginRequiredError:
+            return CheckResult("P3", "codex 登录", False, fatal=True,
+                               message="Codex CLI 未登录", detail="codex login")
+    path = shutil.which(llm_bin)
+    if not path:
+        return CheckResult("P3", "codex 登录", False, fatal=False,
+                           message="codex 命令未找到，跳过登录探测", detail="codex login")
+    try:
+        import subprocess
+        proc = subprocess.run([path, "login", "status"], capture_output=True, text=True, timeout=15)
+        return CheckResult("P3", "codex 登录", proc.returncode == 0,
+                           fatal=proc.returncode != 0,
+                           message="codex login status 通过" if proc.returncode == 0 else "Codex CLI 未登录",
+                           detail="" if proc.returncode == 0 else "codex login")
+    except Exception as e:
+        return CheckResult("P3", "codex 登录", False, fatal=False,
+                           message=f"codex login status 探测失败：{e}", detail="codex login")
+
+
 def check_typst(typst_bin: str = "typst") -> CheckResult:
     """P4：typst 可执行。"""
     path = shutil.which(typst_bin)
@@ -402,7 +460,8 @@ def run_m3_preflight(
 # ============================================================
 def run_preflight(
     *,
-    claude_bin: str = DEFAULT_CLAUDE_BIN,
+    backend: str = "claude",
+    llm_bin: str = DEFAULT_CLAUDE_BIN,
     login_hint: str = DEFAULT_LOGIN_HINT,
     typst_bin: str = "typst",
     font_name: str = "Noto Sans CJK SC",
@@ -420,7 +479,8 @@ def run_preflight(
     失败的致命项不立即抛（收集完再让调用方决定）；调用方可据 ``report.fatal_failures`` 抛异常。
 
     Args:
-        claude_bin: claude 命令名或路径。
+        backend: LLM CLI 后端（claude/codex）。
+        llm_bin: 后端命令名或路径。
         login_hint: 登录指引串。
         typst_bin/...: 其余各检查参数。
         llm: ClaudeClient（登录探测用；None 则直接跑 claude auth status）。
@@ -434,9 +494,9 @@ def run_preflight(
     log = logger_obj or logger
     report = PreflightReport(results=[
         check_node(),
-        check_claude_bin(claude_bin),
-        check_claude_login(claude_bin, llm, login_hint,
-                           skip_in_dry_run=skip_login, is_dry_run=is_dry_run),
+        check_llm_bin(backend, llm_bin),
+        check_llm_login(backend, llm_bin, llm, login_hint,
+                        skip_in_dry_run=skip_login, is_dry_run=is_dry_run),
         check_typst(typst_bin),
         check_font(typst_bin, font_name),
         check_template(template_dir),

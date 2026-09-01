@@ -65,12 +65,14 @@ class PipelineCfg(BaseModel):
 class LlmCfg(BaseModel):
     """LLM 配置（llm）。
 
-    改造1：从 ZCode CLI 换成 Claude CLI。backend/claude_bin/login_hint 是 claude 专用；
-    model_* 字段值是 claude CLI 的 ``--model`` alias（sonnet/opus/haiku）。
+    支持 Claude CLI 和 Codex CLI 双后端。``model_*`` 仍是各阶段模型；
+    Codex 可用 ``codex_model`` 统一覆盖，便于最小配置。
     """
 
-    backend: Literal["claude"] = "claude"
+    backend: Literal["claude", "codex"] = "claude"
     claude_bin: str = "claude"
+    codex_bin: str = "codex"
+    codex_model: str | None = None
     login_hint: str = "claude auth login"
     model_tailor: str = "sonnet"
     model_profiler: str = "sonnet"

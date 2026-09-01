@@ -42,6 +42,8 @@ from .errors import (
 __all__ = [
     "LlmResult",
     "ClaudeClient",
+    "CodexClient",
+    "create_llm_client",
     "compute_cache_key",
     "extract_json",
     "RATE_LIMIT_MARKERS",
@@ -218,7 +220,8 @@ class ClaudeClient:
         """
         claude_bin = self.cfg.claude_bin
         path = shutil.which(claude_bin) or claude_bin
-        if not os.path.exists(path):
+        # 测试注入 run_fn 时由替身处理命令，不依赖本机安装 CLI。
+        if self._run_fn is subprocess.run and not os.path.exists(path):
             raise ClaudeInvocationError(
                 f"claude 命令不在 PATH（{claude_bin}）。请装 Claude CLI 并跑 `claude auth login`。"
             )
@@ -594,6 +597,106 @@ class ClaudeClient:
             purpose="greeter", **_filter_kw(kw),
         )
         return res.text.strip()
+
+
+class CodexClient(ClaudeClient):
+    """使用 ``codex exec`` 的非交互 LLM 后端。
+
+    复用 ClaudeClient 的 prompt、缓存、JSON 提取和重试逻辑，仅替换
+    CLI 可用性/登录探测与单次调用协议。Codex 以 read-only sandbox 运行，
+    prompt 通过 stdin 传入，不授予项目写权限。
+    """
+
+    def _codex_path(self) -> str:
+        codex_bin = self.cfg.codex_bin
+        path = shutil.which(codex_bin) or codex_bin
+        if self._run_fn is subprocess.run and not os.path.exists(path):
+            raise ClaudeInvocationError(
+                f"codex 命令不在 PATH（{codex_bin}）。请安装 Codex CLI 并跑 `codex login`。"
+            )
+        return path
+
+    def check_login(self) -> None:
+        """用 ``codex login status`` 探测 Codex CLI 登录态。"""
+        if self._login_ok:
+            return
+        path = self._codex_path()
+        try:
+            proc = self._run_fn(
+                [path, "login", "status"], capture_output=True, text=True, timeout=15,
+            )
+        except subprocess.TimeoutExpired as e:
+            raise LlmTimeoutError("codex 登录探测超时（15s）") from e
+        if proc.returncode != 0:
+            raise ClaudeLoginRequiredError("codex login")
+        self._login_ok = True
+        self.log.debug("check_login 通过（codex login status）")
+
+    def _call_once(
+        self,
+        prompt: str,
+        *,
+        model: str | None,
+        cwd: str | None,
+        timeout: int,
+    ) -> tuple[str, dict[str, int], str | None]:
+        """执行 ``codex exec --json`` 并从 JSONL 事件取最后一条 agent_message。"""
+        path = self._codex_path()
+        effective_model = self.cfg.codex_model
+        cmd = [
+            path, "exec", "--json", "--sandbox", "read-only",
+            "--skip-git-repo-check", "--ephemeral",
+        ]
+        if effective_model:
+            cmd += ["--model", effective_model]
+        cmd += ["-"]
+        try:
+            proc = self._run_fn(
+                cmd,
+                input=prompt,
+                capture_output=True,
+                text=True,
+                timeout=timeout,
+                cwd=cwd or os.getcwd(),
+            )
+        except subprocess.TimeoutExpired as e:
+            raise LlmTimeoutError(f"codex 调用超时（{timeout}s）") from e
+
+        out = (proc.stdout or "").strip()
+        if proc.returncode != 0:
+            detail = (proc.stderr or out or f"exit={proc.returncode}")[:300]
+            if any(marker in detail.lower() for marker in RATE_LIMIT_MARKERS):
+                raise LlmRateLimitError(f"Codex CLI 限流：{detail}")
+            raise ClaudeInvocationError(f"Codex CLI 调用失败：{detail}")
+
+        messages: list[str] = []
+        usage: dict[str, int] = {}
+        for line in out.splitlines():
+            try:
+                event = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            item = event.get("item") or {}
+            if event.get("type") == "item.completed" and item.get("type") == "agent_message":
+                text = item.get("text")
+                if isinstance(text, str):
+                    messages.append(text)
+            if event.get("type") == "turn.completed":
+                raw_usage = event.get("usage") or {}
+                usage = {
+                    "in": raw_usage.get("input_tokens"),
+                    "out": raw_usage.get("output_tokens"),
+                }
+        if not messages:
+            raise LlmJsonParseError(raw=out, expected_schema="Codex JSONL agent_message")
+        return messages[-1], usage, effective_model or "codex-default"
+
+
+def create_llm_client(cfg: LlmCfg, **kwargs: Any) -> ClaudeClient:
+    """根据 ``llm.backend`` 构建 CLI 后端，业务层保持原有调用接口。"""
+    if cfg.backend == "codex":
+        return CodexClient(cfg, **kwargs)
+    return ClaudeClient(cfg, **kwargs)
 
 
 # ============================================================
